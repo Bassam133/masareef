@@ -1,1054 +1,714 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#0a7d55">
-<title>مصاريفي — متابعة المصاريف الشخصية</title>
-<style>
-/* ============================================================
-   مصاريفي · personal expense tracker
-   design system: Apple-ish HIG, mobile-first, RTL, offline,
-   zero external requests (no CDN, no webfonts)
-   ============================================================ */
-:root{
-  --bg:#eef1f5; --surface:#ffffff; --surface-2:#f8f9fb; --surface-3:#f2f4f7;
-  --ink:#0b1220; --ink-2:#5b6675; --ink-3:#8b95a3;
-  --line:rgba(11,18,32,.10); --line-2:rgba(11,18,32,.055);
-  --accent:#0a7d55; --accent-ink:#05603f; --accent-soft:#e6f4ee;
-  --gold:#a9791a; --gold-soft:#fdf4e2;
-  --danger:#b3261e; --danger-soft:#fdecea;
-  --r-xl:22px; --r-lg:16px; --r-md:12px; --r-sm:9px;
-  --sh-1:0 1px 2px rgba(11,18,32,.05), 0 1px 3px rgba(11,18,32,.045);
-  --sh-2:0 10px 30px rgba(11,18,32,.10);
-  --sh-in:inset 0 0 0 1px var(--line);
-  --tap:46px;
-  --safe-b:env(safe-area-inset-bottom,0px);
-  --f:-apple-system,BlinkMacSystemFont,"SF Arabic","SF Pro Text","Segoe UI",system-ui,"Noto Kufi Arabic",sans-serif;
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#0b0e13; --surface:#151a21; --surface-2:#1a2029; --surface-3:#1f2630;
-    --ink:#f2f5f9; --ink-2:#a3adbb; --ink-3:#76818f;
-    --line:rgba(255,255,255,.13); --line-2:rgba(255,255,255,.07);
-    --accent:#2fbe86; --accent-ink:#8ee7c3; --accent-soft:#12301f;
-    --gold:#e0b25f; --gold-soft:#31260f;
-    --danger:#ff6b60; --danger-soft:#3a1614;
-    --sh-1:0 1px 2px rgba(0,0,0,.5); --sh-2:0 12px 34px rgba(0,0,0,.55);
-  }
-}
-html.light{ --bg:#eef1f5; --surface:#fff; --surface-2:#f8f9fb; --surface-3:#f2f4f7; --ink:#0b1220; --ink-2:#5b6675; --ink-3:#8b95a3; --line:rgba(11,18,32,.10); --line-2:rgba(11,18,32,.055); --accent:#0a7d55; --accent-ink:#05603f; --accent-soft:#e6f4ee; --gold:#a9791a; --gold-soft:#fdf4e2; --danger:#b3261e; --danger-soft:#fdecea; }
-html.dark{ --bg:#0b0e13; --surface:#151a21; --surface-2:#1a2029; --surface-3:#1f2630; --ink:#f2f5f9; --ink-2:#a3adbb; --ink-3:#76818f; --line:rgba(255,255,255,.13); --line-2:rgba(255,255,255,.07); --accent:#2fbe86; --accent-ink:#8ee7c3; --accent-soft:#12301f; --gold:#e0b25f; --gold-soft:#31260f; --danger:#ff6b60; --danger-soft:#3a1614; }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>مصاريفي الذكي | Masareef AI</title>
 
-*,*::before,*::after{ box-sizing:border-box; }
-html,body{ margin:0; padding:0; }
-body{
-  font-family:var(--f); background:var(--bg); color:var(--ink);
-  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-  font-size:15px; line-height:1.5;
-}
-h1,h2,h3,p{ margin:0; }
-button,input,select{ font:inherit; color:inherit; }
-button{ cursor:pointer; border:0; background:none; -webkit-tap-highlight-color:transparent; }
-.num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
-.app{ max-width:580px; margin:0 auto; padding:12px 14px calc(96px + var(--safe-b)); }
+  <!-- Apple Web App Metas -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="مصاريفي">
+  <meta name="theme-color" content="#0F172A">
 
-/* ---------- header ---------- */
-.hd{ padding:6px 2px 12px; }
-.hd-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.brand{ display:flex; align-items:center; gap:10px; }
-.logo{
-  width:40px; height:40px; border-radius:13px; display:grid; place-items:center;
-  background:linear-gradient(145deg,var(--accent),var(--accent-ink)); color:#fff;
-  font-size:19px; font-weight:800; box-shadow:var(--sh-2);
-}
-.brand h1{ font-size:17px; font-weight:800; letter-spacing:-.2px; }
-.sub{ font-size:11.5px; color:var(--ink-3); }
-.icon-btn{
-  width:38px; height:38px; border-radius:12px; display:grid; place-items:center;
-  background:var(--surface); box-shadow:var(--sh-1),var(--sh-in); color:var(--ink-2); font-size:15px;
-}
-.month-nav{ display:flex; align-items:center; gap:8px; margin-top:12px; }
-.mn-btn{
-  width:38px; height:38px; border-radius:12px; background:var(--surface); color:var(--ink);
-  box-shadow:var(--sh-1),var(--sh-in); font-size:18px; font-weight:700; line-height:1;
-}
-.mn-cur{
-  flex:1; height:38px; border-radius:12px; background:var(--surface); box-shadow:var(--sh-1),var(--sh-in);
-  font-size:14px; font-weight:700;
-}
+  <style>
+    :root {
+      --bg: #0B0F17;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --glass-bg: rgba(15, 23, 42, 0.75);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --primary: #38BDF8;
+      --primary-hover: #0284C7;
+      --accent-green: #34D399;
+      --accent-red: #F87171;
+      --accent-amber: #FBBF24;
+      --radius: 20px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-/* ---------- cards ---------- */
-.card{
-  background:var(--surface); border-radius:var(--r-xl); box-shadow:var(--sh-1),var(--sh-in);
-  padding:16px; margin-bottom:13px;
-}
-.card-h{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.card-h h2{ font-size:14px; font-weight:800; letter-spacing:-.1px; }
-.link{ font-size:12px; font-weight:700; color:var(--accent); }
+    [data-theme="light"] {
+      --bg: #F1F5F9;
+      --card-bg: rgba(255, 255, 255, 0.8);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --primary: #0284C7;
+      --primary-hover: #0369A1;
+    }
 
-/* ---------- hero ---------- */
-.hero{
-  background:linear-gradient(160deg,var(--surface),var(--surface-2));
-  position:relative; overflow:hidden;
-}
-.hero::after{
-  content:""; position:absolute; inset:auto -30px -50px auto; width:150px; height:150px;
-  border-radius:50%; background:radial-gradient(circle,var(--accent-soft),transparent 70%); opacity:.85;
-}
-.hero-k{ font-size:12px; color:var(--ink-2); font-weight:700; }
-.hero-v{ font-size:36px; font-weight:850; letter-spacing:-1px; line-height:1.15; margin:2px 0 8px; }
-.hero-v small{ font-size:14px; font-weight:700; color:var(--ink-3); letter-spacing:0; }
-.hero-meta{ display:flex; flex-wrap:wrap; gap:7px; }
-.chip{
-  display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700;
-  padding:5px 10px; border-radius:999px; background:var(--surface-3); color:var(--ink-2);
-}
-.chip.up{ background:var(--danger-soft); color:var(--danger); }
-.chip.down{ background:var(--accent-soft); color:var(--accent-ink); }
-.chip.ghost{ background:transparent; box-shadow:var(--sh-in); }
-.bud{ margin-top:14px; }
-.bud-top{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-2); font-weight:700; margin-bottom:6px; }
-.bar{ height:9px; border-radius:999px; background:var(--surface-3); overflow:hidden; box-shadow:var(--sh-in); }
-.bar > i{ display:block; height:100%; border-radius:999px; background:var(--accent); transition:width .35s ease; }
-.bar > i.warn{ background:var(--gold); }
-.bar > i.over{ background:var(--danger); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+      -webkit-tap-highlight-color: transparent;
+    }
 
-/* ---------- quick add ---------- */
-.quick{ padding:14px; }
-.q-row{ display:flex; gap:9px; }
-.q-amt{
-  flex:1; height:var(--tap); border-radius:var(--r-md); border:0; background:var(--surface-2);
-  box-shadow:var(--sh-in); padding:0 14px; font-size:22px; font-weight:800; letter-spacing:-.5px;
-}
-.q-amt::placeholder{ color:var(--ink-3); font-weight:600; }
-.q-add{
-  min-width:96px; height:var(--tap); border-radius:var(--r-md); font-size:14px; font-weight:800;
-  background:var(--accent); color:#fff; box-shadow:0 6px 16px rgba(10,125,85,.28);
-}
-.q-add:active{ transform:scale(.97); }
-.q-cats{ display:flex; gap:7px; overflow-x:auto; padding:11px 0 3px; scrollbar-width:none; }
-.q-cats::-webkit-scrollbar{ display:none; }
-.cat-chip{
-  flex:0 0 auto; height:36px; padding:0 13px; border-radius:999px; background:var(--surface-2);
-  box-shadow:var(--sh-in); font-size:12.5px; font-weight:700; color:var(--ink-2);
-  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
-}
-.cat-chip.on{ background:var(--accent); color:#fff; box-shadow:0 4px 12px rgba(10,125,85,.3); }
-.q-extra{ display:flex; gap:9px; margin-top:8px; }
-.q-note,.q-date{
-  height:40px; border-radius:var(--r-sm); border:0; background:var(--surface-2);
-  box-shadow:var(--sh-in); padding:0 12px; font-size:13px; color:var(--ink);
-}
-.q-note{ flex:1.6; } .q-date{ flex:1; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 90px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-/* ---------- category budget bars ---------- */
-.cat-bars{ display:flex; flex-direction:column; gap:13px; }
-.cb{ }
-.cb-top{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:6px; }
-.cb-name{ font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; }
-.cb-dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); flex:0 0 auto; }
-.cb-amt{ font-size:12px; color:var(--ink-2); font-weight:700; }
-.cb-amt b{ color:var(--ink); font-weight:800; }
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-/* ---------- trend ---------- */
-.trend{ display:flex; align-items:flex-end; gap:9px; height:132px; padding-top:6px; }
-.tcol{ flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
-.tbar{ width:100%; border-radius:9px 9px 5px 5px; background:linear-gradient(180deg,var(--accent),var(--accent-ink)); min-height:4px; opacity:.9; }
-.tbar.now{ background:linear-gradient(180deg,#1fc98d,var(--accent)); opacity:1; box-shadow:0 6px 16px rgba(10,125,85,.25); }
-.tlab{ font-size:10px; color:var(--ink-3); font-weight:700; }
-.tval{ font-size:10px; color:var(--ink-2); font-weight:800; }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-/* ---------- expense list ---------- */
-.daygroup{ margin-bottom:14px; }
-.dayhd{ display:flex; align-items:baseline; justify-content:space-between; padding:0 4px 7px; }
-.dayhd b{ font-size:12.5px; font-weight:800; }
-.dayhd span{ font-size:11.5px; color:var(--ink-3); font-weight:700; }
-.row{
-  display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:var(--r-lg);
-  background:var(--surface); box-shadow:var(--sh-1),var(--sh-in); margin-bottom:7px;
-}
-.row-ic{
-  width:36px; height:36px; border-radius:11px; flex:0 0 auto; display:grid; place-items:center;
-  background:var(--surface-3); font-size:16px;
-}
-.row-mid{ flex:1; min-width:0; }
-.row-t{ font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.row-s{ font-size:11px; color:var(--ink-3); font-weight:600; margin-top:1px; }
-.row-amt{ font-size:14.5px; font-weight:850; letter-spacing:-.3px; white-space:nowrap; }
-.row-del{
-  width:32px; height:32px; border-radius:10px; flex:0 0 auto; display:grid; place-items:center;
-  color:var(--ink-3); font-size:15px; background:var(--surface-2); box-shadow:var(--sh-in);
-}
-.row-del:active{ color:var(--danger); }
+    .header-btns {
+      display: flex;
+      gap: 10px;
+    }
 
-/* ---------- forms ---------- */
-.field{ margin-bottom:12px; }
-.field label{ display:block; font-size:12px; font-weight:700; color:var(--ink-2); margin-bottom:6px; }
-.field input,.field select{
-  width:100%; height:44px; border-radius:var(--r-md); border:0; background:var(--surface-2);
-  box-shadow:var(--sh-in); padding:0 13px; font-size:14px;
-}
-.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:11px; }
-.btn{
-  height:46px; border-radius:var(--r-md); padding:0 18px; font-size:14px; font-weight:800;
-  background:var(--surface-2); color:var(--ink); box-shadow:var(--sh-in);
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-}
-.btn.primary{ background:var(--accent); color:#fff; box-shadow:0 6px 16px rgba(10,125,85,.26); }
-.btn.danger{ background:var(--danger-soft); color:var(--danger); }
-.btn.block{ width:100%; }
-.btn-row{ display:flex; gap:10px; flex-wrap:wrap; }
-.hint{ font-size:11.5px; color:var(--ink-3); line-height:1.6; margin-top:10px; }
-.empty{ text-align:center; padding:34px 16px; color:var(--ink-3); font-size:13px; font-weight:600; }
+    .icon-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+    }
 
-/* ---------- tab bar ---------- */
-.tabbar{
-  position:fixed; inset:auto 0 0 0; z-index:40; display:flex; justify-content:center; gap:2px;
-  padding:7px 8px calc(7px + var(--safe-b));
-  background:color-mix(in srgb,var(--surface) 88%,transparent);
-  -webkit-backdrop-filter:saturate(180%) blur(18px); backdrop-filter:saturate(180%) blur(18px);
-  box-shadow:0 -1px 0 var(--line);
-}
-.tab{
-  flex:1; max-width:110px; height:52px; border-radius:14px; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:3px; color:var(--ink-3); font-size:10.5px; font-weight:700;
-}
-.tab svg{ width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
-.tab.on{ color:var(--accent); background:var(--accent-soft); }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
 
-/* ---------- panes ---------- */
-.pane{ display:none; } .pane.on{ display:block; }
-.pane-h{ font-size:19px; font-weight:850; letter-spacing:-.4px; margin:2px 2px 12px; }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
 
-/* ---------- report overlay ---------- */
-.ov{
-  position:fixed; inset:0; z-index:90; background:color-mix(in srgb,#0b1220 62%,transparent);
-  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
-  display:none; overflow:auto; padding:16px 10px calc(96px + var(--safe-b));
-}
-.ov.on{ display:block; }
-.ov-bar{ max-width:210mm; margin:0 auto 12px; display:flex; gap:9px; justify-content:flex-start; }
-.ov-bar .btn{ height:42px; background:#fff; color:#0b1220; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      backdrop-filter: blur(10px);
+    }
 
-/* ================= A4 report sheet ================= */
-.sheet{
-  width:210mm; height:297mm; margin:0 auto; background:#fff; color:#0b1220; position:relative;
-  overflow:hidden; border-radius:2px; box-shadow:var(--sh-2);
-  -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
-.sheet-inner{ padding:16mm 13mm 14mm; transform-origin:top center; }
-.sh-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10mm; border-bottom:2px solid #0a7d55; padding-bottom:4mm; }
-.sh-brand{ display:flex; align-items:center; gap:3mm; }
-.sh-logo{ width:11mm; height:11mm; border-radius:3.4mm; background:#0a7d55; color:#fff; display:grid; place-items:center; font-size:12.5pt; font-weight:800; line-height:1; padding-bottom:.4mm; }
-.sh-brand b{ font-size:15pt; font-weight:800; display:block; }
-.sh-brand span{ font-size:8pt; color:#5b6675; font-weight:600; }
-.sh-title{ text-align:left; }
-.sh-title b{ font-size:13pt; font-weight:800; display:block; }
-.sh-title span{ font-size:8.5pt; color:#5b6675; font-weight:700; }
-.sh-kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:3mm; margin:5mm 0; }
-.kpi{ border:1px solid #e2e6ec; border-radius:3mm; padding:2.6mm 3mm; background:#f8f9fb; }
-.kpi i{ display:block; font-style:normal; font-size:7.5pt; color:#5b6675; font-weight:700; }
-.kpi b{ display:block; font-size:13pt; font-weight:850; letter-spacing:-.3px; margin-top:.6mm; }
-.kpi b small{ font-size:7.5pt; font-weight:700; color:#8b95a3; }
-.sh-h2{ font-size:10pt; font-weight:800; margin:4mm 0 2mm; padding-inline-start:2.4mm; border-inline-start:2.5px solid #0a7d55; }
-table.sh-tbl{ width:100%; border-collapse:collapse; }
-table.sh-tbl th{
-  background:#f2f4f7; font-size:7.5pt; font-weight:800; color:#5b6675; text-align:right;
-  padding:1.8mm 2.2mm; border-bottom:1px solid #e2e6ec;
-}
-table.sh-tbl td{ font-size:8.5pt; font-weight:600; padding:1.7mm 2.2mm; border-bottom:1px solid #eef1f5; font-variant-numeric:tabular-nums; }
-table.sh-tbl td.c,table.sh-tbl th.c{ text-align:center; }
-/* digits-only cells: an RTL base direction pushes the minus sign to the wrong
-   side ("180-" instead of "-180") unless the run is isolated and LTR */
-table.sh-tbl td.n{ font-weight:800; direction:ltr; unicode-bidi:isolate; }
-table.sh-tbl tr.tot td{ background:#e6f4ee; font-weight:850; font-size:9.5pt; border-bottom:0; }
-.mini{ display:flex; align-items:flex-end; gap:3mm; height:28mm; margin-top:2mm; }
-.mini .mv{ font-size:6pt; color:#5b6675; font-weight:800; }
-.mini .m{ flex:1; display:flex; flex-direction:column; align-items:center; gap:1mm; justify-content:flex-end; height:100%; }
-.mini .mb{ width:62%; max-width:11mm; background:#0a7d55; border-radius:1.2mm; min-height:1mm; opacity:.9; }
-.mini .ml{ font-size:6.5pt; color:#8b95a3; font-weight:700; }
-.sh-foot{ position:absolute; inset:auto 13mm 12mm 13mm; display:flex; justify-content:space-between; align-items:center; font-size:7.5pt; color:#8b95a3; font-weight:600; border-top:1px solid #eef1f5; padding-top:2mm; }
+    .card-full {
+      grid-column: span 2;
+    }
 
-/* ================= print: exactly one A4 page ================= */
-@media print{
-  html,body{ background:#fff !important; }
-  .app,.tabbar,.ov-bar{ display:none !important; }
-  .ov{ position:static !important; display:block !important; background:#fff !important; padding:0 !important; overflow:visible !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
-  .sheet{ box-shadow:none !important; border-radius:0 !important; margin:0 !important; break-inside:avoid; page-break-inside:avoid; }
-  @page{ size:A4; margin:0; }
-}
-</style>
+    .card-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .card-amount {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .amount-expense { color: var(--accent-red); }
+    .amount-income { color: var(--accent-green); }
+
+    .ai-box {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(129, 140, 248, 0.15));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 24px;
+    }
+
+    .ai-box-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10x;
+    }
+
+    .ai-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ai-input {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .ai-input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #000;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 0 18px;
+      min-height: 44px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .btn-file {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 0 14px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tx-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+    }
+
+    .tx-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .tx-details .tx-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .tx-details .tx-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .tx-amount {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .modal-content {
+      background: var(--bg);
+      border-top: 1px solid var(--card-border);
+      border-radius: 28px 28px 0 0;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-bottom: 16px;
+      max-height: 400px;
+    }
+
+    .msg {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .msg-user {
+      align-self: flex-start;
+      background: var(--primary);
+      color: #000;
+      font-weight: 600;
+    }
+
+    .msg-ai {
+      align-self: flex-end;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0 24px 0;
+      z-index: 40;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .nav-icon {
+      font-size: 22px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 14px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+    }
+  </style>
 </head>
-
 <body>
-<div class="app">
 
-  <header class="hd">
-    <div class="hd-row">
-      <div class="brand">
-        <span class="logo">﷼</span>
-        <div>
-          <h1>مصاريفي</h1>
-          <p class="sub">متابعة المصاريف الشخصية</p>
-        </div>
-      </div>
-      <button class="icon-btn" id="themeBtn" aria-label="تبديل الوضع">◐</button>
-    </div>
-    <div class="month-nav">
-      <button class="mn-btn" id="prevM" aria-label="الشهر السابق">‹</button>
-      <button class="mn-cur" id="mLabel">—</button>
-      <button class="mn-btn" id="nextM" aria-label="الشهر التالي">›</button>
+  <header class="header">
+    <h1>💎 مصاريفي الذكي</h1>
+    <div class="header-btns">
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button class="icon-btn" onclick="openModal('settingsModal')">⚙️</button>
     </div>
   </header>
 
-  <main>
-    <!-- ================= HOME ================= -->
-    <section class="pane on" id="pane-home">
-      <div class="card hero">
-        <div class="hero-k">إجمالي مصاريف الشهر</div>
-        <div class="hero-v"><span id="hTotal">0</span> <small>ر.س</small></div>
-        <div class="hero-meta">
-          <span class="chip" id="hVsPrev">—</span>
-          <span class="chip ghost num" id="hAvg">—</span>
-        </div>
-        <div class="bud">
-          <div class="bud-top"><span>الميزانية الشهرية</span><span class="num" id="bTxt">—</span></div>
-          <div class="bar"><i id="bBar" style="width:0%"></i></div>
-        </div>
-      </div>
+  <div class="container">
 
-      <div class="card quick">
-        <div class="q-row">
-          <input id="qAmount" class="q-amt num" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off" aria-label="المبلغ">
-          <button class="btn primary q-add" id="qAdd">إضافة</button>
-        </div>
-        <div class="q-cats" id="qCats"></div>
-        <div class="q-extra">
-          <input id="qNote" class="q-note" type="text" placeholder="ملاحظة (اختياري)" autocomplete="off">
-          <input id="qDate" class="q-date num" type="date">
-        </div>
-        <div class="hint">اختر الفئة ← اكتب المبلغ ← «إضافة». المبلغ يُسجَّل بتاريخ اليوم تلقائيًا.</div>
-      </div>
-
-      <div class="card">
-        <div class="card-h"><h2>الميزانية بالفئات</h2><button class="link" data-goto="budget">تعديل</button></div>
-        <div class="cat-bars" id="catBars"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-h"><h2>آخر ٦ أشهر</h2><span class="link" id="trendAvg">—</span></div>
-        <div class="trend" id="trend"></div>
-      </div>
-    </section>
-
-    <!-- ================= LIST ================= -->
-    <section class="pane" id="pane-list">
-      <h2 class="pane-h">مصروفات الشهر</h2>
-      <div class="card" style="padding:13px 14px;">
-        <div class="cb-top" style="margin:0;">
-          <span class="cb-name">الإجمالي</span>
-          <span class="cb-amt"><b class="num" id="lTotal">0</b> ر.س</span>
-        </div>
-      </div>
-      <div id="listBox"></div>
-    </section>
-
-    <!-- ================= FIXED ================= -->
-    <section class="pane" id="pane-fixed">
-      <h2 class="pane-h">الالتزامات الثابتة</h2>
-      <div class="card">
-        <div class="hint" style="margin:0 0 12px;">كل التزام يُسجَّل تلقائيًا مرة واحدة في بداية كل شهر — الإيجار، الإنترنت، الاشتراكات…</div>
-        <div class="grid2">
-          <div class="field" style="grid-column:1/-1;">
-            <label>اسم الالتزام</label>
-            <input id="fName" type="text" placeholder="مثال: إيجار الشقة" autocomplete="off">
-          </div>
-          <div class="field">
-            <label>المبلغ (ر.س)</label>
-            <input id="fAmt" class="num" type="text" inputmode="decimal" placeholder="0.00">
-          </div>
-          <div class="field">
-            <label>يوم الاستحقاق</label>
-            <input id="fDay" class="num" type="number" min="1" max="28" value="1">
-          </div>
-          <div class="field" style="grid-column:1/-1;">
-            <label>الفئة</label>
-            <select id="fCat"></select>
-          </div>
-        </div>
-        <button class="btn primary block" id="fAdd">إضافة التزام ثابت</button>
-      </div>
-      <div id="fixedBox"></div>
-    </section>
-
-    <!-- ================= BUDGET ================= -->
-    <section class="pane" id="pane-budget">
-      <h2 class="pane-h">الميزانية</h2>
-      <div class="card">
-        <div class="field">
-          <label>الميزانية الشهرية الكلية (ر.س)</label>
-          <input id="bTotal" class="num" type="text" inputmode="decimal" placeholder="0.00">
-        </div>
-        <div class="hint" style="margin-bottom:14px;">اترك أي فئة فارغة إذا ما تبغى لها سقف محدد.</div>
-        <div id="bFields"></div>
-        <button class="btn primary block" id="bSave" style="margin-top:12px;">حفظ الميزانية</button>
-      </div>
-    </section>
-
-    <!-- ================= DATA ================= -->
-    <section class="pane" id="pane-data">
-      <h2 class="pane-h">التقرير والنسخ الاحتياطي</h2>
-      <div class="card">
-        <div class="card-h"><h2>تقرير الشهر (PDF صفحة واحدة)</h2></div>
-        <div class="hint" style="margin:0 0 12px;">ملخص الشهر كاملًا على صفحة A4 واحدة — جاهز للطباعة أو الحفظ بصيغة PDF.</div>
-        <button class="btn primary block" id="repBtn">عرض التقرير / حفظ PDF</button>
+    <div class="overview-grid">
+      <div class="card card-full">
+        <div class="card-title">إجمالي المصاريف هذا الشهر</div>
+        <div class="card-amount amount-expense" id="totalExpense">0.00 ر.س</div>
       </div>
       <div class="card">
-        <div class="card-h"><h2>تصدير ونسخ احتياطي</h2></div>
-        <div class="btn-row">
-          <button class="btn" id="csvBtn" style="flex:1;">تصدير CSV (Excel)</button>
-          <button class="btn" id="bakBtn" style="flex:1;">نسخة احتياطية JSON</button>
-        </div>
-        <div class="btn-row" style="margin-top:10px;">
-          <button class="btn" id="restoreBtn" style="flex:1;">استرجاع من نسخة</button>
-          <button class="btn danger" id="wipeBtn" style="flex:1;">حذف كل البيانات</button>
-        </div>
-        <input id="restoreFile" type="file" accept=".json,application/json" style="display:none">
-        <div class="hint" id="dataStat">—</div>
+        <div class="card-title">عدد العمليات</div>
+        <div class="card-amount" id="totalCount">0</div>
       </div>
-    </section>
-  </main>
-</div>
+      <div class="card">
+        <div class="card-title">المتبقي من الميزانية</div>
+        <div class="card-amount amount-income" id="remainingBudget">0.00 ر.س</div>
+      </div>
+    </div>
 
-<nav class="tabbar">
-  <button class="tab on" data-pane="home">
-    <svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.8V20h5v-5.5h4V20h5V9.8"/></svg><span>الرئيسية</span>
-  </button>
-  <button class="tab" data-pane="list">
-    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>المصروفات</span>
-  </button>
-  <button class="tab" data-pane="fixed">
-    <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3.2-6.9"/><path d="M21 4v5h-5"/></svg><span>الثابتة</span>
-  </button>
-  <button class="tab" data-pane="budget">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 4"/></svg><span>الميزانية</span>
-  </button>
-  <button class="tab" data-pane="data">
-    <svg viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M7.5 8.5L12 4l4.5 4.5"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg><span>نسخ</span>
-  </button>
-</nav>
+    <!-- 👉 SMART INPUT BOX (The requested feature) -->
+    <div class="ai-box">
+      <div class="ai-box-title">
+        <span>✨ الإدخال الذكي بالذكاء الاصطناعي</span>
+      </div>
+      <div class="ai-input-group">
+        <input type="text" id="aiText" class="ai-input" placeholder="اكتب أو انسخ رسالة الخصم البنكية...">
+        <label class="btn-file" title="تصوير إيصال">
+          📸
+          <input type="file" id="aiImage" accept="image/*" style="display:none" onchange="processImageInput(this)">
+        </label>
+        <button class="btn-primary" onclick="processTextInput()" id="aiSubmitBtn">إضافة</button>
+      </div>
+    </div>
 
-<div class="ov" id="ov">
-  <div class="ov-bar">
-    <button class="btn primary" id="ovPrint">طباعة / حفظ PDF</button>
-    <button class="btn" id="ovClose">إغلاق</button>
+    <div class="section-title">
+      <span>آخر العمليات</span>
+      <button style="background:none; border:none; color:var(--primary); font-size:13px; cursor:pointer;" onclick="clearAllData()">مسح الكل</button>
+    </div>
+
+    <div class="tx-list" id="txList">
+      <div style="text-align: center; color: var(--text-muted); padding: 30px 0;">
+        لا توجد عمليات مسجلة بعد. استخدم الإدخال الذكي أعلاه!
+      </div>
+    </div>
+
   </div>
-  <div class="sheet" id="sheet">
-    <div class="sheet-inner" id="sheetInner"></div>
-    <div class="sh-foot"><span>مصاريفي — تقرير المصاريف الشخصية</span><span class="num" id="repFoot">—</span></div>
+
+  <!-- AI Financial Advisor Modal -->
+  <div class="modal" id="aiModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🤖 المستشار المالي الذكي</h3>
+        <button class="icon-btn" onclick="closeModal('aiModal')">✕</button>
+      </div>
+      <div class="chat-box" id="chatBox">
+        <div class="msg msg-ai">
+          أهلاً بك! أنا مستشارك المالي. كيف أستطيع مساعدتك اليوم بناءً على مصاريفك؟
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <input type="text" id="chatInput" class="ai-input" placeholder="اسأل المستشار...">
+        <button class="btn-primary" onclick="sendChatMessage()">إرسال</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-(function(){
-  'use strict';
-  var LSKEY = 'masareef_v1';
+  <!-- Settings Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>⚙️ إعدادات التطبيق</h3>
+        <button class="icon-btn" onclick="closeModal('settingsModal')">✕</button>
+      </div>
+      <label style="font-size:13px; color:var(--text-muted);">الميزانية الشهرية (ريال):</label>
+      <input type="number" id="budgetInput" class="input-field" placeholder="مثال: 5000">
+      
+      <label style="font-size:13px; color:var(--text-muted);">مفتاح Google Gemini API (مجاني):</label>
+      <input type="password" id="apiKeyInput" class="input-field" placeholder="AIzaSy...">
+      
+      <button class="btn-primary" style="width:100%; justify-content:center;" onclick="saveSettings()">حفظ الإعدادات</button>
+    </div>
+  </div>
 
-  /* ---------------- categories ---------------- */
-  var CATS = [
-    { n:'سكن وإيجار',    e:'🏠', c:'#0a7d55' },
-    { n:'كهرباء وماء',   e:'💡', c:'#1f8fbf' },
-    { n:'إنترنت واتصالات', e:'📶', c:'#6a6bd6' },
-    { n:'بنزين وسيارة',  e:'⛽', c:'#c2703a' },
-    { n:'بقالة',         e:'🛒', c:'#2e9e68' },
-    { n:'مطاعم وكافيهات', e:'☕', c:'#a9791a' },
-    { n:'صحة ودواء',     e:'🩺', c:'#c04a4a' },
-    { n:'تعليم',         e:'📚', c:'#7a5cc0' },
-    { n:'ملابس',         e:'👕', c:'#3f8f8f' },
-    { n:'ترفيه',         e:'🎬', c:'#d1739b' },
-    { n:'اشتراكات',      e:'🔁', c:'#8a6d3b' },
-    { n:'تحويلات وأخرى', e:'➗', c:'#6b7280' }
-  ];
-  var CAT_NAMES = CATS.map(function(c){ return c.n; });
-  function catOf(name){
-    for (var i=0;i<CATS.length;i++) if (CATS[i].n === name) return CATS[i];
-    return { n:name || 'أخرى', e:'➗', c:'#6b7280' };
-  }
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('main')">
+      <span class="nav-icon">📊</span>
+      <span>المصاريف</span>
+    </button>
+    <button class="nav-item" onclick="openModal('aiModal')">
+      <span class="nav-icon">🤖</span>
+      <span>المستشار</span>
+    </button>
+    <button class="nav-item" onclick="exportData()">
+      <span class="nav-icon">📥</span>
+      <span>تصدير</span>
+    </button>
+  </nav>
 
-  /* ---------------- state ---------------- */
-  var S = { settings:{ totalBudget:0, catBudget:{}, lastCat:CAT_NAMES[0] }, expenses:[], fixed:[], posted:[] };
+  <script>
+    // State
+    let transactions = JSON.parse(localStorage.getItem('masareef_txs') || '[]');
+    let budget = parseFloat(localStorage.getItem('masareef_budget') || '3000');
+    let apiKey = localStorage.getItem("masareef_apikey") || "";
 
-  function load(){
-    try{
-      var raw = localStorage.getItem(LSKEY);
-      if (raw){
-        var d = JSON.parse(raw);
-        if (d && typeof d === 'object'){
-          S.settings = Object.assign(S.settings, d.settings || {});
-          S.settings.catBudget = Object.assign({}, (d.settings||{}).catBudget || {});
-          S.expenses = Array.isArray(d.expenses) ? d.expenses : [];
-          S.fixed    = Array.isArray(d.fixed) ? d.fixed : [];
-          S.posted   = Array.isArray(d.posted) ? d.posted : [];
+    // Init
+    document.getElementById('budgetInput').value = budget;
+    document.getElementById('apiKeyInput').value = apiKey;
+    updateUI();
+
+    function toggleTheme() {
+      const body = document.body;
+      const current = body.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      body.setAttribute('data-theme', next);
+      document.getElementById('themeBtn').textContent = next === 'light' ? '☀️' : '🌙';
+    }
+
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function saveSettings() {
+      budget = parseFloat(document.getElementById('budgetInput').value) || 0;
+      apiKey = document.getElementById('apiKeyInput').value.trim();
+      localStorage.setItem('masareef_budget', budget);
+      localStorage.setItem('masareef_apikey', apiKey);
+      updateUI();
+      closeModal('settingsModal');
+      alert('تم حفظ الإعدادات بنجاح!');
+    }
+
+    function updateUI() {
+      const list = document.getElementById('txList');
+      const totalExpenseEl = document.getElementById('totalExpense');
+      const totalCountEl = document.getElementById('totalCount');
+      const remainingBudgetEl = document.getElementById('remainingBudget');
+
+      const total = transactions.reduce((acc, item) => acc + item.amount, 0);
+      totalExpenseEl.textContent = total.toFixed(2) + ' ر.س';
+      totalCountEl.textContent = transactions.length;
+
+      const remaining = budget - total;
+      remainingBudgetEl.textContent = remaining.toFixed(2) + ' ر.س';
+      remainingBudgetEl.className = 'card-amount ' + (remaining >= 0 ? 'amount-income' : 'amount-expense');
+
+      if (transactions.length === 0) {
+        list.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px 0;">لا توجد عمليات مسجلة بعد. استخدم الإدخال الذكي أعلاه!</div>`;
+        return;
+      }
+
+      list.innerHTML = transactions.map((tx, index) => `
+        <div class="tx-item">
+          <div class="tx-info">
+            <div class="tx-icon">${getCategoryIcon(tx.category)}</div>
+            <div class="tx-details">
+              <div class="tx-title">${tx.title}</div>
+              <div class="tx-date">${tx.category} • ${tx.date}</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="tx-amount amount-expense">-${tx.amount.toFixed(2)} ر.س</div>
+            <button style="background:none; border:none; color:var(--accent-red); cursor:pointer;" onclick="deleteTx(${index})">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getCategoryIcon(cat) {
+      const map = {
+        'مطاعم': '🍔', 'تسوق': '🛍️', 'فواتير': '⚡', 'سيارة': '🚗',
+        'صحة': '💊', 'ترفيه': '🎬', 'سفر': '✈️', 'عام': '💸'
+      };
+      return map[cat] || '💸';
+    }
+
+    function deleteTx(index) {
+      transactions.splice(index, 1);
+      localStorage.setItem('masareef_txs', JSON.stringify(transactions));
+      updateUI();
+    }
+
+    function clearAllData() {
+      if (confirm('هل أنت تأكد من مسح جميع العمليات؟')) {
+        transactions = [];
+        localStorage.setItem('masareef_txs', JSON.stringify(transactions));
+        updateUI();
+      }
+    }
+
+    // AI API Call via Gemini 3.6 Flash
+    async function callGemini(prompt, base64Image = null) {
+      if (!apiKey) {
+        alert('يرجى إضافة مفتاح Gemini API في الإعدادات أولاً!');
+        openModal('settingsModal');
+        return null;
+      }
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+      const parts = [{ text: prompt }];
+
+      if (base64Image) {
+        parts.push({
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: base64Image
+          }
+        });
+      }
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts }] })
+        });
+
+        const data = await res.json();
+        return data.candidates[0].content.parts[0].text;
+      } catch (err) {
+        console.error(err);
+        alert('حدث خطأ أثناء التواصل مع الذكاء الاصطناعي');
+        return null;
+      }
+    }
+
+    async function processTextInput() {
+      const input = document.getElementById('aiText');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const btn = document.getElementById('aiSubmitBtn');
+      btn.textContent = 'جاري التحليل...';
+      btn.disabled = true;
+
+      const prompt = `أنت مساعد مالي ذكي. استخرج من النص التالي بيانات العملية المالية وأرجعها بصيغة JSON فقط بهذا الشكل بالضبط بدون أي كلام إضافي:
+      {"title": "اسم الجهة أو الوصف", "amount": 0.00, "category": "مطاعم/تسوق/فواتير/سيارة/عام"}
+
+      النص: "${text}"`;
+
+      const res = await callGemini(prompt);
+      btn.textContent = 'إضافة';
+      btn.disabled = false;
+
+      if (res) {
+        try {
+          const cleanJson = res.replace(/```json|```/g, '').trim();
+          const parsed = JSON.parse(cleanJson);
+          addTransaction(parsed.title, parsed.amount, parsed.category);
+          input.value = '';
+        } catch (e) {
+          alert('تعذر فهم النص تلقائياً، يرجى المحاولة بشكل أوضح');
         }
       }
-    }catch(e){ /* corrupt store: start clean, never crash */ }
-  }
-  function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(S)); }catch(e){} }
-
-  /* ---------------- helpers ---------------- */
-  function $(id){ return document.getElementById(id); }
-  function uid(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function pad(n){ return (n<10?'0':'') + n; }
-  function parseNum(v){
-    if (v === null || v === undefined) return 0;
-    var s = ('' + v).replace(/[٠-٩]/g, function(d){ return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); })
-                   .replace(/[,\s\u066c]/g, '').replace(/[^0-9.\-]/g, '');
-    var n = parseFloat(s);
-    return isFinite(n) ? n : 0;
-  }
-  function money(n){
-    var v = Math.round(n * 100) / 100;
-    return v.toLocaleString('en-US', { maximumFractionDigits:2 });
-  }
-  function esc(s){
-    return ('' + (s===null||s===undefined?'':s))
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-  function todayISO(){ var d = new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
-  function mkOf(iso){ return ('' + iso).slice(0,7); }
-  function nowMK(){ return todayISO().slice(0,7); }
-  function mkAdd(mk, delta){
-    var y = parseInt(mk.slice(0,4),10), m = parseInt(mk.slice(5,7),10) - 1 + delta;
-    var d = new Date(y, m, 1);
-    return d.getFullYear()+'-'+pad(d.getMonth()+1);
-  }
-  function mkLabel(mk){
-    var y = parseInt(mk.slice(0,4),10), m = parseInt(mk.slice(5,7),10);
-    var names = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-    return names[m-1] + ' ' + y;
-  }
-  function mkShort(mk){
-    /* full month names: the usual 3-letter cut («سبت» = August) reads as
-       «السبت» in Arabic and confuses the charts */
-    return mkLabel(mk).split(' ')[0];
-  }
-  function dayLabel(iso){
-    var d = new Date(iso + 'T12:00:00');
-    var days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    var y = d.getFullYear(), m = d.getMonth()+1, dd = d.getDate();
-    return { wd: days[d.getDay()], full: y+'/'+m+'/'+dd, dm: dd+'/'+m };
-  }
-
-  /* ---------------- computations ---------------- */
-  var curM = nowMK();
-
-  function inMonth(mk){ return S.expenses.filter(function(x){ return mkOf(x.date) === mk; }); }
-  function totalOf(mk){
-    return inMonth(mk).reduce(function(a,x){ return a + (parseNum(x.amount) || 0); }, 0);
-  }
-  function byCat(mk){
-    var out = {};
-    inMonth(mk).forEach(function(x){
-      var k = x.cat || 'تحويلات وأخرى';
-      out[k] = (out[k] || 0) + (parseNum(x.amount) || 0);
-    });
-    return out;
-  }
-  function avgMonths(n, skipCurrent){
-    var sum = 0, cnt = 0, start = skipCurrent ? -1 : 0;
-    for (var i = start; i > start - n; i--){
-      var mk = mkAdd(curM, i);
-      var t = totalOf(mk);
-      if (t > 0){ sum += t; cnt++; }
     }
-    return cnt ? sum / cnt : 0;
-  }
-  function daysInMonth(mk){
-    var y = parseInt(mk.slice(0,4),10), m = parseInt(mk.slice(5,7),10);
-    return new Date(y, m, 0).getDate();
-  }
 
-  /* ---------------- fixed commitments auto-post ---------------- */
-  function postFixed(){
-    var mk = nowMK();
-    if (S.posted.indexOf(mk) >= 0) return 0;
-    var active = S.fixed.filter(function(f){ return f.active !== false; });
-    /* nothing to post: leave the month UNMARKED, otherwise a commitment added
-       later in the same month would be skipped for the whole month */
-    if (!active.length) return 0;
-    var dim = daysInMonth(mk), added = 0;
-    active.forEach(function(f){
-      var d = Math.min(parseInt(f.day,10) || 1, dim);
-      S.expenses.push({
-        id: uid(), date: mk + '-' + pad(d), amount: parseNum(f.amount),
-        cat: f.cat || 'اشتراكات', note: (f.name || 'التزام ثابت'), fixed: true
-      });
-      added++;
-    });
-    S.posted.push(mk);
-    save();
-    return added;
-  }
-  function isPosted(mk){ return S.posted.indexOf(mk) >= 0; }
-  function undoPost(){
-    var mk = nowMK();
-    S.expenses = S.expenses.filter(function(x){ return !(x.fixed && mkOf(x.date) === mk); });
-    S.posted = S.posted.filter(function(m){ return m !== mk; });
-    save();
-  }
+    function addTransaction(title, amount, category) {
+      const tx = {
+        title: title || 'مصروف عام',
+        amount: parseFloat(amount) || 0,
+        category: category || 'عام',
+        date: new Date().toLocaleDateString('ar-SA')
+      };
 
-  /* ---------------- mutations ---------------- */
-  function addExpense(amount, cat, note, date){
-    var a = parseNum(amount);
-    if (!(a > 0)) return false;
-    S.expenses.push({ id: uid(), date: date || todayISO(), amount: a, cat: cat || 'تحويلات وأخرى', note: (note || '').trim() });
-    S.settings.lastCat = cat || S.settings.lastCat;
-    save(); return true;
-  }
-  function delExpense(id){
-    S.expenses = S.expenses.filter(function(x){ return x.id !== id; });
-    save();
-  }
-
-  /* ---------------- render: hero + budget bar ---------------- */
-  function renderHero(){
-    var t = totalOf(curM);
-    $('hTotal').textContent = money(t);
-    var prev = totalOf(mkAdd(curM, -1));
-    var el = $('hVsPrev');
-    if (prev > 0){
-      var diff = ((t - prev) / prev) * 100;
-      var up = diff > 0;
-      el.className = 'chip ' + (up ? 'up' : 'down');
-      el.textContent = (up ? '▲ ' : '▼ ') + Math.abs(Math.round(diff)) + '% مقابل الشهر الماضي';
-    } else {
-      el.className = 'chip';
-      el.textContent = 'لا بيانات للشهر الماضي';
+      transactions.unshift(tx);
+      localStorage.setItem('masareef_txs', JSON.stringify(transactions));
+      updateUI();
     }
-    var avg = avgMonths(3, true);
-    $('hAvg').textContent = avg > 0 ? ('متوسط ٣ أشهر: ' + money(avg) + ' ر.س') : 'متوسط ٣ أشهر: —';
 
-    var bud = parseNum(S.settings.totalBudget);
-    var bar = $('bBar');
-    if (bud > 0){
-      var pct = Math.min(100, (t / bud) * 100);
-      bar.style.width = pct + '%';
-      bar.className = (t > bud) ? 'over' : (pct >= 70 ? 'warn' : '');
-      $('bTxt').textContent = money(t) + ' / ' + money(bud) + '  (' + Math.round((t/bud)*100) + '%)';
-    } else {
-      bar.style.width = '0%'; bar.className = '';
-      $('bTxt').textContent = 'لم تُحدَّد — اضبطها من «الميزانية»';
+    async function processImageInput(fileInput) {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        const base64 = e.target.result.split(',')[1];
+        const prompt = `حلل صورة هذا الإيصال البنكي واستخرج منه بيانات العملية وأرجعها بصيغة JSON فقط:
+        {"title": "اسم التاجر", "amount": 0.00, "category": "مطاعم/تسوق/فواتير/سيارة/عام"}`;
+
+        alert('جاري قراءة الإيصال بالذكاء الاصطناعي...');
+        const res = await callGemini(prompt, base64);
+        if (res) {
+          try {
+            const cleanJson = res.replace(/```json|```/g, '').trim();
+            const parsed = JSON.parse(cleanJson);
+            addTransaction(parsed.title, parsed.amount, parsed.category);
+            alert('تمت إضافة العملية من الإيصال بنجاح!');
+          } catch (err) {
+            alert('تعذر استخراج البيانات من الصورة');
+          }
+        }
+      };
+      reader.readAsDataURL(file);
     }
-  }
 
-  /* ---------------- render: category bars ---------------- */
-  function renderCatBars(){
-    var spent = byCat(curM);
-    var max = 0;
-    CAT_NAMES.forEach(function(n){ max = Math.max(max, spent[n] || 0); });
-    var html = '';
-    CATS.slice().sort(function(a,b){ return (spent[b.n]||0) - (spent[a.n]||0); }).forEach(function(c){
-      var s = spent[c.n] || 0;
-      if (s <= 0 && !parseNum(S.settings.catBudget[c.n])) return;
-      var b = parseNum(S.settings.catBudget[c.n]);
-      var pct = b > 0 ? Math.min(100, (s/b) * 100) : (max > 0 ? (s/max) * 100 : 0);
-      var cls = b > 0 ? (s > b ? 'over' : (pct >= 70 ? 'warn' : '')) : '';
-      html += '<div class="cb">'
-        + '<div class="cb-top"><span class="cb-name"><span class="cb-dot" style="background:'+c.c+'"></span>'+esc(c.n)+'</span>'
-        + '<span class="cb-amt"><b class="num">'+money(s)+'</b>' + (b>0 ? (' / <span class="num">'+money(b)+'</span>') : '') + ' ر.س</span></div>'
-        + '<div class="bar"><i class="'+cls+'" style="width:'+pct+'%;background:'+(cls?'':c.c)+'"></i></div>'
-        + '</div>';
-    });
-    if (!html) html = '<div class="empty">لا مصاريف هذا الشهر بعد — سجّل أول مصروف من الأعلى.</div>';
-    $('catBars').innerHTML = html;
-  }
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
 
-  /* ---------------- render: 6-month trend ---------------- */
-  function renderTrend(){
-    var ms = [], max = 0;
-    for (var i = -5; i <= 0; i++){
-      var mk = mkAdd(curM, i);
-      var t = totalOf(mk);
-      ms.push({ mk: mk, t: t });
-      max = Math.max(max, t);
-    }
-    var tot = ms.reduce(function(a,x){ return a + x.t; }, 0);
-    $('trendAvg').textContent = 'المجموع: ' + money(tot) + ' ر.س';
-    $('trend').innerHTML = ms.map(function(x){
-      var h = max > 0 ? Math.max(3, Math.round((x.t / max) * 96)) : 3;
-      var now = x.mk === curM;
-      return '<div class="tcol" title="'+mkLabel(x.mk)+': '+money(x.t)+' ر.س">'
-        + '<span class="tval num">'+(x.t ? Math.round(x.t) : '')+'</span>'
-        + '<div class="tbar'+(now?' now':'')+'" style="height:'+h+'px"></div>'
-        + '<span class="tlab">'+mkShort(x.mk)+'</span></div>';
-    }).join('');
-  }
+      const chatBox = document.getElementById('chatBox');
+      chatBox.innerHTML += `<div class="msg msg-user">${text}</div>`;
+      input.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
 
-  /* ---------------- render: expense list ---------------- */
-  function renderList(){
-    var list = inMonth(curM).slice().sort(function(a,b){
-      if (a.date === b.date) return 0;
-      return a.date < b.date ? 1 : -1;
-    });
-    $('lTotal').textContent = money(totalOf(curM));
-    if (!list.length){
-      $('listBox').innerHTML = '<div class="card"><div class="empty">لا مصاريف في ' + mkLabel(curM) + '</div></div>';
-      return;
-    }
-    var groups = {}, order = [];
-    list.forEach(function(x){
-      if (!groups[x.date]){ groups[x.date] = []; order.push(x.date); }
-      groups[x.date].push(x);
-    });
-    var html = '<div class="card">';
-    order.forEach(function(d){
-      var dl = dayLabel(d);
-      var daySum = groups[d].reduce(function(a,x){ return a + parseNum(x.amount); }, 0);
-      html += '<div class="daygroup">'
-        + '<div class="dayhd"><b>'+dl.wd+' '+dl.full+'</b><span class="num">'+money(daySum)+' ر.س</span></div>';
-      groups[d].forEach(function(x){
-        var c = catOf(x.cat);
-        html += '<div class="row">'
-          + '<span class="row-ic" style="background:'+c.c+'22">'+c.e+'</span>'
-          + '<div class="row-mid"><div class="row-t">'+esc(x.cat)+ (x.fixed ? ' <span class="chip ghost" style="font-size:9.5px;padding:2px 7px;">ثابت</span>' : '') +'</div>'
-          + (x.note ? '<div class="row-s">'+esc(x.note)+'</div>' : '') + '</div>'
-          + '<span class="row-amt num">'+money(parseNum(x.amount))+'</span>'
-          + '<button class="row-del" data-del="'+x.id+'" aria-label="حذف">✕</button>'
-          + '</div>';
-      });
-      html += '</div>';
-    });
-    html += '</div>';
-    $('listBox').innerHTML = html;
-  }
+      const context = JSON.stringify(transactions);
+      const prompt = `أنت مستشار مالي شخصي ذكي. هذه هي قائمة مصاريف المستخدم الحالية: ${context}. الميزانية الشهرية: ${budget} ريال.
+      أجب عن سؤال المستخدم باختصار، وبأسلوب عملي ومباشر باللغة العربية: "${text}"`;
 
-  /* ---------------- render: fixed ---------------- */
-  function renderFixed(){
-    if (!S.fixed.length){
-      $('fixedBox').innerHTML = '<div class="card"><div class="empty">ما فيه التزامات ثابتة بعد</div></div>';
-    } else {
-      var html = '<div class="card"><div class="card-h"><h2>التزاماتك الثابتة</h2><span class="link">'+S.fixed.length+'</span></div>';
-      S.fixed.forEach(function(f){
-        var c = catOf(f.cat);
-        html += '<div class="row">'
-          + '<span class="row-ic" style="background:'+c.c+'22">'+c.e+'</span>'
-          + '<div class="row-mid"><div class="row-t">'+esc(f.name)+'</div>'
-          + '<div class="row-s">'+esc(f.cat)+' · يوم '+(f.day||1)+' من كل شهر</div></div>'
-          + '<span class="row-amt num">'+money(parseNum(f.amount))+'</span>'
-          + '<button class="row-del" data-delfix="'+f.id+'" aria-label="حذف">✕</button></div>';
-      });
-      html += '</div>';
-      $('fixedBox').innerHTML = html;
-    }
-    var posted = isPosted(nowMK());
-    var el = $('fAdd');
-    if (posted && S.fixed.length){
-      $('fixedBox').insertAdjacentHTML('afterbegin',
-        '<div class="card"><div class="card-h"><h2>حالة هذا الشهر</h2></div>'
-        + '<div class="hint" style="margin:0 0 12px;">تم تسجيل التزامات '+mkLabel(nowMK())+' تلقائيًا.</div>'
-        + '<button class="btn block" id="undoBtn">تراجع عن التسجيل التلقائي لهذا الشهر</button></div>');
-    }
-  }
+      chatBox.innerHTML += `<div class="msg msg-ai" id="loadingMsg">جاري التفكير...</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
 
-  /* ---------------- render: budget fields ---------------- */
-  function renderBudget(){
-    $('bTotal').value = S.settings.totalBudget ? money(S.settings.totalBudget) : '';
-    $('bFields').innerHTML = CATS.map(function(c, i){
-      var v = parseNum(S.settings.catBudget[c.n]);
-      return '<div class="field"><label>'+c.e+' '+esc(c.n)+'</label>'
-        + '<input class="num b-cat" data-cat="'+esc(c.n)+'" type="text" inputmode="decimal" placeholder="بلا سقف" value="'+(v?money(v):'')+'"></div>';
-    }).join('');
-  }
+      const res = await callGemini(prompt);
+      document.getElementById('loadingMsg').remove();
 
-  /* ---------------- render: data stats ---------------- */
-  function renderData(){
-    var n = S.expenses.length;
-    var first = S.expenses.map(function(x){ return x.date; }).sort()[0] || '—';
-    var months = {}; S.expenses.forEach(function(x){ months[mkOf(x.date)] = 1; });
-    $('dataStat').innerHTML = 'عدد العمليات: <b class="num">'+n+'</b> · عدد الأشهر: <b class="num">'+Object.keys(months).length+'</b> · أول عملية: <b class="num">'+esc(first)+'</b>'
-      + (S.fixed.length ? (' · التزامات ثابتة: <b class="num">'+S.fixed.length+'</b>') : '');
-  }
-
-  function renderAll(){
-    $('mLabel').textContent = mkLabel(curM);
-    renderHero(); renderCatBars(); renderTrend(); renderList(); renderFixed(); renderBudget(); renderData();
-  }
-
-  /* ---------------- toast ---------------- */
-  var toastT = null;
-  function toast(msg){
-    var el = $('toastEl');
-    if (!el){
-      el = document.createElement('div');
-      el.id = 'toastEl';
-      el.style.cssText = 'position:fixed;inset:auto 0 92px 0;margin:0 auto;width:max-content;max-width:80%;'
-        + 'background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:14px;font-size:13px;'
-        + 'font-weight:700;z-index:120;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:opacity .2s';
-      document.body.appendChild(el);
-    }
-    el.textContent = msg;
-    el.style.opacity = '1';
-    clearTimeout(toastT);
-    toastT = setTimeout(function(){ el.style.opacity = '0'; }, 1800);
-  }
-
-  /* ---------------- report: one A4 page ---------------- */
-  function buildReport(){
-    var t = totalOf(curM), list = inMonth(curM);
-    var dim = daysInMonth(curM), daily = t / dim;
-    var prev = totalOf(mkAdd(curM,-1));
-    var cmp = prev > 0 ? Math.round(((t - prev) / prev) * 100) : null;
-    var spent = byCat(curM);
-    var bud = parseNum(S.settings.totalBudget);
-
-    var rows = '';
-    CATS.forEach(function(c){
-      var s = spent[c.n] || 0, b = parseNum(S.settings.catBudget[c.n]);
-      if (s <= 0 && b <= 0) return;
-      var rest = b > 0 ? b - s : null;
-      var pct = b > 0 ? Math.round((s / b) * 100) : null;
-      rows += '<tr><td>'+esc(c.n)+'</td>'
-        + '<td class="n c">'+(b > 0 ? money(b) : '—')+'</td>'
-        + '<td class="n c">'+money(s)+'</td>'
-        + '<td class="n c" style="color:'+((rest !== null && rest < 0) ? '#b3261e' : '#0a7d55')+'">'+(rest === null ? '—' : money(rest))+'</td>'
-        + '<td class="c" style="color:'+((pct !== null && pct > 100) ? '#b3261e' : '#5b6675')+'">'+(pct === null ? '—' : pct + '%')+'</td></tr>';
-    });
-    if (!rows) rows = '<tr><td colspan="5" class="c" style="color:#8b95a3">لا مصاريف مسجّلة في هذا الشهر</td></tr>';
-    rows += '<tr class="tot"><td>الإجمالي</td><td class="c n">'+(bud > 0 ? money(bud) : '—')+'</td>'
-      + '<td class="c n">'+money(t)+'</td>'
-      + '<td class="c n">'+(bud > 0 ? money(bud - t) : '—')+'</td>'
-      + '<td class="c">'+(bud > 0 ? Math.round((t / bud) * 100) + '%' : '—')+'</td></tr>';
-
-    var top = list.slice().sort(function(a,b){ return parseNum(b.amount) - parseNum(a.amount); }).slice(0, 6);
-    var topRows = top.length ? top.map(function(x){
-      var dl = dayLabel(x.date);
-      return '<tr><td>'+esc(x.cat)+'</td><td>'+esc(x.note || '—')+'</td><td class="c">'+dl.dm+'</td>'
-        + '<td class="n c">'+money(parseNum(x.amount))+'</td></tr>';
-    }).join('') : '<tr><td colspan="4" class="c" style="color:#8b95a3">—</td></tr>';
-
-    var ms = [], mx = 0;
-    for (var i = -5; i <= 0; i++){ var mk = mkAdd(curM, i); var v = totalOf(mk); ms.push({ mk:mk, v:v }); mx = Math.max(mx, v); }
-    var mini = ms.map(function(x){
-      var h = mx > 0 ? Math.max(1.2, (x.v / mx) * 14) : 1.2;
-      return '<div class="m"><span class="mv num">'+(x.v ? money(Math.round(x.v)) : '0')+'</span>'
-        + '<div class="mb" style="height:'+h.toFixed(1)+'mm;'+(x.mk===curM?'':'opacity:.45')+'"></div>'
-        + '<span class="ml">'+mkShort(x.mk)+'</span></div>';
-    }).join('');
-
-    $('sheetInner').innerHTML =
-      '<div class="sh-head">'
-      +   '<div class="sh-brand"><span class="sh-logo"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h13.5A1.5 1.5 0 0 1 18 9v8a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 17z"/><path d="M3 11h16.5"/><path d="M15.5 7.5V5.8A1.3 1.3 0 0 0 14.2 4.5H6"/><path d="M20.5 12.5v3"/></svg></span><div><b>مصاريفي</b><span>تقرير المصاريف الشخصية</span></div></div>'
-      +   '<div class="sh-title"><b>تقرير شهر '+mkLabel(curM)+'</b><span>تاريخ الإصدار: '+dayLabel(todayISO()).full+'</span></div>'
-      + '</div>'
-      + '<div class="sh-kpis">'
-      +   '<div class="kpi"><i>إجمالي الشهر</i><b class="num">'+money(t)+' <small>ر.س</small></b></div>'
-      +   '<div class="kpi"><i>عدد العمليات</i><b class="num">'+list.length+'</b></div>'
-      +   '<div class="kpi"><i>المتوسط اليومي</i><b class="num">'+money(daily)+' <small>ر.س</small></b></div>'
-      +   '<div class="kpi"><i>مقابل الشهر الماضي</i><b class="num">'+(cmp === null ? '—' : ((cmp > 0 ? '▲ ' : '▼ ') + Math.abs(cmp) + '%'))+'</b></div>'
-      + '</div>'
-      + '<div class="sh-h2">المصاريف حسب الفئة</div>'
-      + '<table class="sh-tbl"><thead><tr><th>الفئة</th><th class="c">الميزانية</th><th class="c">المصروف</th><th class="c">المتبقي</th><th class="c">النسبة</th></tr></thead>'
-      + '<tbody>'+rows+'</tbody></table>'
-      + '<div class="sh-h2">أعلى ٦ عمليات في الشهر</div>'
-      + '<table class="sh-tbl"><thead><tr><th>الفئة</th><th>ملاحظة</th><th class="c">التاريخ</th><th class="c">المبلغ</th></tr></thead>'
-      + '<tbody>'+topRows+'</tbody></table>'
-      + '<div class="sh-h2">اتجاه آخر ٦ أشهر</div>'
-      + '<div class="mini">'+mini+'</div>';
-
-    $('repFoot').textContent = mkLabel(curM) + ' · ' + money(t) + ' ر.س';
-  }
-
-  function fitSheet(){
-    var sheet = $('sheet'), inner = $('sheetInner');
-    if (!sheet || !inner) return;
-    inner.style.transform = 'none';
-    var avail = sheet.clientHeight, need = inner.scrollHeight;
-    if (!avail || !need) return;
-    var reserve = Math.round((16 / 25.4) * 96);   /* room for the absolute footer */
-    var k = (avail - reserve) / need;
-    if (k < 1) inner.style.transform = 'scale(' + (Math.floor(k * 1000) / 1000) + ')';
-  }
-  function openReport(){ buildReport(); $('ov').classList.add('on'); requestAnimationFrame(fitSheet); setTimeout(fitSheet, 120); }
-  function closeReport(){ $('ov').classList.remove('on'); }
-
-  /* ---------------- export / backup ---------------- */
-  function download(name, text, mime){
-    var blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name;
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
-  }
-  function toCSV(){
-    var head = ['التاريخ','الفئة','المبلغ','ملاحظة','ثابت'];
-    var rows = S.expenses.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; }).map(function(x){
-      var f = [x.date, x.cat, String(parseNum(x.amount)), (x.note || '').replace(/[",\n]/g,' '), x.fixed ? 'نعم' : 'لا'];
-      return f.map(function(v){ return '"' + ('' + v).replace(/"/g,'""') + '"'; }).join(',');
-    });
-    return '\ufeff' + [head.join(',')].concat(rows).join('\r\n');
-  }
-
-  /* ---------------- events ---------------- */
-  function buildChips(){
-    $('qCats').innerHTML = CATS.map(function(c){
-      return '<button class="cat-chip'+(c.n === S.settings.lastCat ? ' on' : '')+'" data-cat="'+esc(c.n)+'">'+c.e+' '+esc(c.n)+'</button>';
-    }).join('');
-  }
-  function selCat(name){ S.settings.lastCat = name; save(); buildChips(); }
-
-  function doAdd(){
-    var amt = $('qAmount').value;
-    if (!(parseNum(amt) > 0)){ toast('اكتب مبلغًا صحيحًا'); $('qAmount').focus(); return; }
-    addExpense(amt, S.settings.lastCat, $('qNote').value, $('qDate').value || todayISO());
-    $('qAmount').value = ''; $('qNote').value = '';
-    renderAll(); toast('تمت إضافة ' + money(parseNum(amt)) + ' ر.س — ' + S.settings.lastCat);
-  }
-
-  document.addEventListener('click', function(ev){
-    var t = ev.target;
-    var chip = t.closest && t.closest('.cat-chip');
-    if (chip){ selCat(chip.getAttribute('data-cat')); return; }
-    var go = t.closest && t.closest('[data-goto]');
-    if (go){ showPane(go.getAttribute('data-goto')); return; }
-    var del = t.closest && t.closest('[data-del]');
-    if (del){ delExpense(del.getAttribute('data-del')); renderAll(); toast('حُذف المصروف'); return; }
-    var delf = t.closest && t.closest('[data-delfix]');
-    if (delf){
-      var id = delf.getAttribute('data-delfix');
-      var f = S.fixed.filter(function(x){ return x.id === id; })[0];
-      if (f && confirm('حذف الالتزام «' + f.name + '»؟')){
-        S.fixed = S.fixed.filter(function(x){ return x.id !== id; });
-        save(); renderAll(); toast('حُذف الالتزام');
+      if (res) {
+        chatBox.innerHTML += `<div class="msg msg-ai">${res}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
       }
-      return;
     }
-    if (t.id === 'undoBtn'){ undoPost(); renderAll(); toast('تم التراجع عن التسجيل التلقائي'); return; }
-    var tab = t.closest && t.closest('.tab');
-    if (tab){ showPane(tab.getAttribute('data-pane')); return; }
-  });
 
-  function showPane(name){
-    ['home','list','fixed','budget','data'].forEach(function(n){
-      var el = $('pane-' + n);
-      if (el) el.classList.toggle('on', n === name);
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(b){
-      b.classList.toggle('on', b.getAttribute('data-pane') === name);
-    });
-    window.scrollTo({ top:0, behavior:'smooth' });
-  }
-
-  $('qAdd').addEventListener('click', doAdd);
-  $('qAmount').addEventListener('keydown', function(e){ if (e.key === 'Enter') doAdd(); });
-  $('qNote').addEventListener('keydown', function(e){ if (e.key === 'Enter') doAdd(); });
-  $('prevM').addEventListener('click', function(){ curM = mkAdd(curM, -1); syncDate(); renderAll(); });
-  $('nextM').addEventListener('click', function(){ curM = mkAdd(curM, 1); syncDate(); renderAll(); });
-  function syncDate(){
-    /* keep the date inside the month being viewed, so entries land where expected */
-    if (curM === nowMK()) $('qDate').value = todayISO();
-    else $('qDate').value = curM + '-01';
-  }
-
-  $('fAdd').addEventListener('click', function(){
-    var n = ($('fName').value || '').trim();
-    var a = parseNum($('fAmt').value);
-    if (!n){ toast('اكتب اسم الالتزام'); return; }
-    if (!(a > 0)){ toast('اكتب مبلغًا صحيحًا'); return; }
-    var item = { id: uid(), name: n, amount: a, cat: $('fCat').value, day: Math.min(28, Math.max(1, parseInt($('fDay').value,10) || 1)), active: true };
-    S.fixed.push(item);
-    save();
-    /* make it show up in THIS month immediately: post the whole month if it has
-       not been posted yet, otherwise post just the new commitment */
-    if (!isPosted(nowMK())){
-      toast(postFixed() ? ('أُضيف التزام ثابت وسُجِّل لشهر ' + mkLabel(nowMK())) : 'أُضيف التزام ثابت');
-    } else {
-      var mk2 = nowMK();
-      S.expenses.push({
-        id: uid(), date: mk2 + '-' + pad(Math.min(item.day, daysInMonth(mk2))),
-        amount: item.amount, cat: item.cat, note: item.name, fixed: true
-      });
-      save();
-      toast('أُضيف التزام ثابت وسُجِّل لهذا الشهر');
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `masareef_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
     }
-    $('fName').value = ''; $('fAmt').value = '';
-    renderAll();
-  });
-
-  $('bSave').addEventListener('click', function(){
-    S.settings.totalBudget = parseNum($('bTotal').value);
-    var nb = {};
-    Array.prototype.forEach.call(document.querySelectorAll('.b-cat'), function(inp){
-      var v = parseNum(inp.value);
-      if (v > 0) nb[inp.getAttribute('data-cat')] = v;
-    });
-    S.settings.catBudget = nb;
-    save(); renderAll(); toast('حُفظت الميزانية');
-  });
-
-  $('csvBtn').addEventListener('click', function(){ download('masareef-' + todayISO() + '.csv', toCSV(), 'text/csv;charset=utf-8'); toast('صُدِّر ملف CSV'); });
-  $('bakBtn').addEventListener('click', function(){ download('masareef-backup-' + todayISO() + '.json', JSON.stringify(S, null, 1), 'application/json'); toast('صُدِّرت نسخة احتياطية'); });
-  $('restoreBtn').addEventListener('click', function(){ $('restoreFile').click(); });
-  $('restoreFile').addEventListener('change', function(e){
-    var f = e.target.files && e.target.files[0];
-    if (!f) return;
-    var r = new FileReader();
-    r.onload = function(){
-      try{
-        var d = JSON.parse(r.result);
-        if (!d || !Array.isArray(d.expenses)) throw new Error('bad');
-        if (!confirm('استرجاع ' + d.expenses.length + ' عملية؟ سيُدمج مع بياناتك الحالية.')) return;
-        var have = {}; S.expenses.forEach(function(x){ have[x.id] = 1; });
-        d.expenses.forEach(function(x){ if (!have[x.id]) S.expenses.push(x); });
-        (d.fixed || []).forEach(function(x){ if (!S.fixed.filter(function(y){ return y.id === x.id; }).length) S.fixed.push(x); });
-        (d.posted || []).forEach(function(m){ if (S.posted.indexOf(m) < 0) S.posted.push(m); });
-        save(); renderAll(); toast('تم الاسترجاع');
-      }catch(err){ toast('الملف غير صالح'); }
-      e.target.value = '';
-    };
-    r.readAsText(f);
-  });
-  $('wipeBtn').addEventListener('click', function(){
-    if (!confirm('حذف كل المصاريف والميزانية نهائيًا؟ لا يمكن الرجوع.')) return;
-    if (!confirm('تأكيد أخير: متأكد؟')) return;
-    S = { settings:{ totalBudget:0, catBudget:{}, lastCat:CAT_NAMES[0] }, expenses:[], fixed:[], posted:[] };
-    save(); curM = nowMK(); syncDate(); renderAll(); toast('حُذفت كل البيانات');
-  });
-
-  $('repBtn').addEventListener('click', openReport);
-  $('ovClose').addEventListener('click', closeReport);
-  $('ovPrint').addEventListener('click', function(){ fitSheet(); setTimeout(function(){ window.print(); }, 80); });
-  window.addEventListener('beforeprint', fitSheet);
-  window.addEventListener('resize', function(){ if ($('ov').classList.contains('on')) fitSheet(); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeReport(); });
-
-  var themeOrder = ['system','light','dark'];
-  function applyTheme(){
-    var m = localStorage.getItem('masareef_theme') || 'system';
-    document.documentElement.classList.remove('light','dark');
-    if (m !== 'system') document.documentElement.classList.add(m);
-    $('themeBtn').textContent = m === 'dark' ? '☾' : (m === 'light' ? '☀' : '◐');
-  }
-  $('themeBtn').addEventListener('click', function(){
-    var m = localStorage.getItem('masareef_theme') || 'system';
-    var nx = themeOrder[(themeOrder.indexOf(m) + 1) % themeOrder.length];
-    localStorage.setItem('masareef_theme', nx);
-    applyTheme(); toast(nx === 'system' ? 'وضع الجهاز' : (nx === 'dark' ? 'الوضع الليلي' : 'الوضع النهاري'));
-  });
-
-  /* ---------------- init ---------------- */
-  load();
-  postFixed();
-  buildChips();
-  $('fCat').innerHTML = CATS.map(function(c){ return '<option value="'+esc(c.n)+'">'+c.e+' '+esc(c.n)+'</option>'; }).join('');
-  $('fCat').value = 'اشتراكات';
-  $('qDate').value = todayISO();
-  applyTheme();
-  renderAll();
-  fitSheet();
-})();
-</script>
+  </script>
 </body>
 </html>
